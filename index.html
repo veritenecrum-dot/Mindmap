@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Mind Map of RCC Regulations</title>
+    <style>
+        /* Basic Reset & Body Styles */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: sans-serif;
+            background-color: #0f172a; /* bg-slate-900 */
+            color: #e2e8f0; /* text-slate-200 */
+        }
+
+        /* SVG Container */
+        #mind-map-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        #mind-map-svg {
+            cursor: grab;
+            user-select: none; /* Prevent text selection during pan */
+        }
+        
+        #mind-map-svg:active {
+            cursor: grabbing;
+        }
+
+        /* Node Styles */
+        .node-group {
+            cursor: pointer;
+            transition: transform 500ms ease-in-out;
+        }
+
+        .node-rect {
+            transition: all 500ms ease-in-out;
+        }
+        
+        /* ForeignObject Content */
+        .node-content-wrapper {
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 12px;
+            line-height: 1.6;
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+        
+        /* Custom scrollbar for webkit browsers */
+        .node-content-wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+        .node-content-wrapper::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+        .node-content-wrapper::-webkit-scrollbar-thumb {
+            background-color: rgba(255,255,255,0.3);
+            border-radius: 6px;
+        }
+        
+        /* Toggle Button */
+        .toggle-button {
+            cursor: pointer;
+            transition: transform 500ms ease-in-out;
+        }
+        
+        .toggle-button-circle {
+            transition: all 300ms ease-in-out;
+        }
+        
+        .node-group:hover .toggle-button-circle {
+             transform: scale(1.1);
+        }
+
+        .toggle-button-text {
+            pointer-events: none;
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "d3": "https://esm.sh/d3@7"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div id="mind-map-container"></div>
+    
+    <!-- Application Logic -->
+    <script type="module" src="/index.js"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
