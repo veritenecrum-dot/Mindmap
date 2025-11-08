@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>[RuM] MindMap</title>
+    <title>Interactive Mind Map of RCC Regulations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         /* Basic Reset & Body Styles */
         body, html {
@@ -12,15 +15,74 @@
             width: 100vw;
             height: 100vh;
             overflow: hidden;
-            font-family: sans-serif;
-            background-color: #0f172a; /* bg-slate-900 */
+            font-family: 'Poppins', sans-serif;
+            background-color: #020617; /* bg-slate-950 */
             color: #e2e8f0; /* text-slate-200 */
         }
+
+        #background-blobs {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.25;
+            animation: move 25s infinite alternate;
+        }
+
+        .blob.color-1 {
+            width: 400px;
+            height: 400px;
+            background: #4f46e5; /* indigo-600 */
+            top: -100px;
+            left: -150px;
+        }
+
+        .blob.color-2 {
+            width: 350px;
+            height: 350px;
+            background: #0891b2; /* cyan-600 */
+            bottom: -50px;
+            right: -100px;
+            animation-duration: 20s;
+        }
+
+        .blob.color-3 {
+            width: 300px;
+            height: 300px;
+            background: #be185d; /* pink-700 */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.15;
+            animation-duration: 30s;
+        }
+        
+        @keyframes move {
+          from {
+            transform: translate(0, 0) rotate(0deg);
+          }
+          to {
+            transform: translate(100px, 50px) rotate(180deg);
+          }
+        }
+
 
         /* SVG Container */
         #mind-map-container {
             width: 100%;
             height: 100%;
+            background: transparent;
+            position: relative;
+            z-index: 1;
         }
 
         #mind-map-svg {
@@ -31,15 +93,21 @@
         #mind-map-svg:active {
             cursor: grabbing;
         }
+        
+        .link {
+            fill: none;
+            stroke: rgba(148, 163, 184, 0.4); /* slate-400 with opacity */
+            stroke-width: 1.5px;
+        }
 
         /* Node Styles */
         .node-group {
             cursor: pointer;
-            transition: transform 500ms ease-in-out;
+            transition: transform 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
         .node-rect {
-            transition: all 500ms ease-in-out;
+            transition: all 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
         }
         
         /* ForeignObject Content */
@@ -48,7 +116,7 @@
             overflow-y: auto;
             padding-right: 12px;
             line-height: 1.6;
-            font-family: sans-serif;
+            font-family: 'Poppins', sans-serif;
             font-size: 14px;
         }
         
@@ -57,17 +125,18 @@
             width: 6px;
         }
         .node-content-wrapper::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.1);
+            background: rgba(0,0,0,0.2);
+            border-radius: 3px;
         }
         .node-content-wrapper::-webkit-scrollbar-thumb {
             background-color: rgba(255,255,255,0.3);
-            border-radius: 6px;
+            border-radius: 3px;
         }
         
         /* Toggle Button */
         .toggle-button {
             cursor: pointer;
-            transition: transform 500ms ease-in-out;
+            transition: transform 300ms ease-in-out;
         }
         
         .toggle-button-circle {
@@ -80,8 +149,8 @@
 
         .toggle-button-text {
             pointer-events: none;
-            font-size: 20px;
-            font-weight: bold;
+            font-size: 24px;
+            font-weight: 300;
         }
     </style>
 <script type="importmap">
@@ -94,6 +163,11 @@
 <link rel="stylesheet" href="/index.css">
 </head>
 <body>
+    <div id="background-blobs">
+        <div class="blob color-1"></div>
+        <div class="blob color-2"></div>
+        <div class="blob color-3"></div>
+    </div>
     <div id="mind-map-container"></div>
     
     <!-- Application Logic -->
