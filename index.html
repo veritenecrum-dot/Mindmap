@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>[RuM] MindMap</title>
+    <title>Interactive Mind Map of RCC Regulations</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -101,9 +101,20 @@
         }
 
         /* Node Styles */
-        .node-group {
+        .node-positioner {
             cursor: pointer;
+        }
+
+        .node-group {
             transition: transform 300ms cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        .node-positioner:hover .node-group {
+            transform: scale(1.03);
+        }
+        
+        .node-positioner:hover .node-rect {
+            filter: url(#shadow-hover);
         }
 
         .node-rect {
@@ -143,7 +154,7 @@
             transition: all 300ms ease-in-out;
         }
         
-        .node-group:hover .toggle-button-circle {
+        .node-positioner:hover .toggle-button-circle {
              transform: scale(1.1);
         }
 
@@ -171,6 +182,7 @@
     <div id="mind-map-container"></div>
     
     <!-- Application Logic -->
-    <script type="module" src="/index.js"></script>
+    <script type="module" src="./index.js"></script>
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>

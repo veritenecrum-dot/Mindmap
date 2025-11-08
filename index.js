@@ -549,6 +549,17 @@ filter.append('feDropShadow')
     .attr('flood-color', '#000000')
     .attr('flood-opacity', 0.4);
 
+// Add a stronger shadow for hover state
+const filterHover = defs.append('filter')
+    .attr('id', 'shadow-hover')
+    .attr('x', '-50%').attr('y', '-50%')
+    .attr('width', '200%').attr('height', '200%');
+filterHover.append('feDropShadow')
+    .attr('dx', 0).attr('dy', 6)
+    .attr('stdDeviation', 8)
+    .attr('flood-color', '#000000')
+    .attr('flood-opacity', 0.5);
+
 const g = svg.append('g').attr('class', 'main-group');
 
 // --- HIERARCHY & LAYOUT ---
@@ -616,25 +627,57 @@ function handleToggleExpand(d) {
     render(d); // Re-render from the clicked node
 }
 
-svg.on('mousedown', (event) => {
+function panStart(point) {
     isPanning = true;
-    lastPoint = { x: event.clientX, y: event.clientY };
-});
+    lastPoint = { x: point.clientX, y: point.clientY };
+}
 
-svg.on('mousemove', (event) => {
+function panMove(point) {
     if (!isPanning) return;
-    const dx = event.clientX - lastPoint.x;
-    const dy = event.clientY - lastPoint.y;
-    lastPoint = { x: event.clientX, y: event.clientY };
+    const dx = point.clientX - lastPoint.x;
+    const dy = point.clientY - lastPoint.y;
+    lastPoint = { x: point.clientX, y: point.clientY };
     if (!container) return;
     const scale = viewBox.width / container.clientWidth;
     viewBox.x -= dx * scale;
     viewBox.y -= dy * scale;
     svg.attr('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
+}
+
+function panEnd() {
+    isPanning = false;
+}
+
+// Mouse events
+svg.on('mousedown', (event) => panStart(event));
+svg.on('mousemove', (event) => panMove(event));
+svg.on('mouseup', panEnd);
+svg.on('mouseleave', panEnd);
+
+// Touch events for mobile
+svg.on('touchstart', (event) => {
+    event.preventDefault();
+    if (event.touches.length === 1) {
+        panStart(event.touches[0]);
+    }
+}, { passive: false });
+
+svg.on('touchmove', (event) => {
+    event.preventDefault();
+    if (event.touches.length === 1) {
+        panMove(event.touches[0]);
+    }
+}, { passive: false });
+
+svg.on('touchend', (event) => {
+    event.preventDefault();
+    panEnd();
+});
+svg.on('touchcancel', (event) => {
+    event.preventDefault();
+    panEnd();
 });
 
-svg.on('mouseup', () => { isPanning = false; });
-svg.on('mouseleave', () => { isPanning = false; });
 
 svg.on('wheel', (event) => {
     event.preventDefault();
@@ -691,14 +734,17 @@ function render(source) {
         .remove();
 
     // --- NODES ---
-    const node = g.selectAll('g.node-group').data(nodes, d => d.data.id);
+    const node = g.selectAll('g.node-positioner').data(nodes, d => d.data.id);
 
     const nodeEnter = node.enter().append('g')
-        .attr('class', 'node-group')
+        .attr('class', 'node-positioner')
         .attr('transform', `translate(${source.x0}, ${source.y0})`)
         .style('opacity', 0);
     
-    nodeEnter.each(function(d) {
+    const nodeGroup = nodeEnter.append('g')
+        .attr('class', 'node-group');
+
+    nodeGroup.each(function(d) {
         const group = d3.select(this);
         const hasContent = !!d.data.content;
         const width = hasContent ? CONTENT_NODE_WIDTH : TITLE_NODE_WIDTH;
