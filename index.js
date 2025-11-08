@@ -514,9 +514,6 @@ const mindMapData = {
 
 // --- STATE & CONFIG ---
 let selectedNodeId = mindMapData.id;
-let viewBox = { x: -800, y: -450, width: 1600, height: 1000 };
-let isPanning = false;
-let lastPoint = { x: 0, y: 0 };
 
 // --- CONSTANTS ---
 const TITLE_NODE_WIDTH = 200;
@@ -627,78 +624,21 @@ function handleToggleExpand(d) {
     render(d); // Re-render from the clicked node
 }
 
-function panStart(point) {
-    isPanning = true;
-    lastPoint = { x: point.clientX, y: point.clientY };
-}
+// --- ZOOM/PAN LOGIC using d3.zoom ---
+const zoom = d3.zoom()
+    .scaleExtent([0.2, 2.5])
+    .on('start', () => svg.style('cursor', 'grabbing'))
+    .on('zoom', (event) => {
+        g.attr('transform', event.transform);
+    })
+    .on('end', () => svg.style('cursor', 'grab'));
 
-function panMove(point) {
-    if (!isPanning) return;
-    const dx = point.clientX - lastPoint.x;
-    const dy = point.clientY - lastPoint.y;
-    lastPoint = { x: point.clientX, y: point.clientY };
-    if (!container) return;
-    const scale = viewBox.width / container.clientWidth;
-    viewBox.x -= dx * scale;
-    viewBox.y -= dy * scale;
-    svg.attr('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-}
+svg.call(zoom);
 
-function panEnd() {
-    isPanning = false;
-}
-
-// Mouse events
-svg.on('mousedown', (event) => panStart(event));
-svg.on('mousemove', (event) => panMove(event));
-svg.on('mouseup', panEnd);
-svg.on('mouseleave', panEnd);
-
-// Touch events for mobile
-svg.on('touchstart', (event) => {
-    event.preventDefault();
-    if (event.touches.length === 1) {
-        panStart(event.touches[0]);
-    }
-}, { passive: false });
-
-svg.on('touchmove', (event) => {
-    event.preventDefault();
-    if (event.touches.length === 1) {
-        panMove(event.touches[0]);
-    }
-}, { passive: false });
-
-svg.on('touchend', (event) => {
-    event.preventDefault();
-    panEnd();
-});
-svg.on('touchcancel', (event) => {
-    event.preventDefault();
-    panEnd();
-});
-
-
-svg.on('wheel', (event) => {
-    event.preventDefault();
-    const zoomFactor = 1.1;
-    const { clientX, clientY, deltaY } = event;
-    if(!svgNode) return;
-
-    const point = new DOMPoint(clientX, clientY);
-    const ctm = svgNode.getScreenCTM();
-    if (!ctm) return;
-    const svgPoint = point.matrixTransform(ctm.inverse());
-    
-    const { width, height, x, y } = viewBox;
-    const newWidth = deltaY < 0 ? width / zoomFactor : width * zoomFactor;
-    const newHeight = deltaY < 0 ? height / zoomFactor : height * zoomFactor;
-    const dx = (svgPoint.x - x) * (newWidth / width - 1);
-    const dy = (svgPoint.y - y) * (newHeight / height - 1);
-
-    viewBox = { width: newWidth, height: newHeight, x: x - dx, y: y - dy };
-    svg.attr('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
-});
+// Set initial transform to center the graph
+const { width, height } = container.getBoundingClientRect();
+const initialTransform = d3.zoomIdentity.translate(width / 2, height / 2).scale(0.8);
+svg.call(zoom.transform, initialTransform);
 
 
 // --- RENDER FUNCTION ---
@@ -825,8 +765,6 @@ function render(source) {
         d.x0 = d.x;
         d.y0 = d.y;
     });
-
-    svg.attr('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
 }
 
 // --- INITIALIZATION ---
